@@ -1,11 +1,19 @@
-const byte ledPin = 2;  // for ESP32 built-in LED
-
-// setting PWM properties
-const int freq = 5000;
-const int ledChannel = 0;
-const int resolution = 10; //Resolution 8, 10, 12, 15
-
-ledcSetup(ledChannel, freq, resolution); // configure LED PWM functionalitites
-ledcAttachPin(analogOutPin, ledChannel); // attach the channel to the GPIO2 to be controlled
-
-ledcWrite(ledChannel, 102); //PWM Value varries from 0 to 1023 
+void Thermistor(int16_t ADCvalue)
+{
+  double T, Temp;
+  double T0 = 301.15;  // 273.15 + 28 (room temperature) 室溫換成絕對溫度
+  double lnR;
+  int16_t R;          // Thermistor resistence 
+  int16_t R0 = 8805;  // calibrated by reading R at room temperature (=28 degree Celsius )
+  int16_t B  = 3950;
+  int16_t Pullup = 9930; // 10K ohm
+  
+  // R / (Pullup + R)   = adc / 4096
+  R = (Pullup * ADCvalue) / (4096 - ADCvalue);
+  
+  // B = (log(R) - log(R0)) / (1/T - 1/T0) 
+  T = 1 / (1/T0 + (log(R)-log(R0)) / B );
+  Temp = T - 273.15;  
+    
+  Serial.println(Temp);
+}
